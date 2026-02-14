@@ -1,0 +1,54 @@
+{
+  "name": "magic-tools",
+  "displayName": "Magic Tools",
+  "description": "A collection of useful development tools",
+  "version": "1.0.2",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/magic-tools.git"
+  },
+  "activationEvents": [
+    "onView:magic-tools-sidebar"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "magic-tools-sidebar",
+          "title": "Magic Tools",
+          "icon": "assets/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "magic-tools-sidebar": [
+        {
+          "id": "magic-tools-view",
+          "name": "Tools Panel",
+          "type": "webview"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "typescript": "^4.9.4"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  }
+}
