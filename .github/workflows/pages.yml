@@ -4,8 +4,8 @@ name: Deploy Docs (GitHub Pages)
 #   - push 到 main 且改动 docs/ 或工具清单来源文件时自动部署
 #   - 也可在 Actions 里手动触发
 #
-# 首次使用: 仓库 Settings -> Pages -> Build and deployment -> Source 选择
-#          "GitHub Actions" (只需设置一次)
+# 首次使用: 仓库 Settings -> Pages -> Build and deployment -> Source 选择 "GitHub Actions"
+# (只需一次; 未启用时本工作流会跳过部署并留一条 warning, 不会失败)
 on:
   push:
     branches: [main]
@@ -31,15 +31,17 @@ jobs:
   build:
     name: 生成并打包站点
     runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
 
-      # gen-docs.mjs 只读源码文件, 不需要依赖; 装依赖是为了将来页面需要复用源码数据时不改流程
+      # gen-docs.mjs 只读源码文件, 不需要依赖; 装依赖是为了页面将来复用源码数据时不用改流程
       - name: 安装依赖
         run: npm ci
 
@@ -56,22 +58,40 @@ jobs:
       - name: 官网冒烟测试
         run: node scripts/smoke-docs.mjs
 
-      - uses: actions/configure-pages@v5
-        with:
-          # 首次运行自动开启 Pages (仓库还没启用时), 否则需手工到 Settings -> Pages 选 GitHub Actions
-          enablement: true
+      # Pages 未启用时直接跳过部署: 否则 configure-pages 会报
+      # "Get Pages site failed" 让整个工作流变红
+      - name: 检查 Pages 是否已启用
+        id: pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if curl -sf -o /dev/null \
+               -H "Authorization: Bearer ${GH_TOKEN}" \
+               -H "Accept: application/vnd.github+json" \
+               "https://api.github.com/repos/${GITHUB_REPOSITORY}/pages"; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Pages 已启用"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::GitHub Pages 尚未启用, 已跳过部署。请到 Settings → Pages → Source 选择 \"GitHub Actions\", 之后重新运行本工作流即可。"
+          fi
 
-      - uses: actions/upload-pages-artifact@v3
+      - if: steps.pages.outputs.enabled == 'true'
+        uses: actions/configure-pages@v6
+
+      - if: steps.pages.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v5
         with:
           path: docs
 
   deploy:
     name: 部署到 GitHub Pages
     needs: build
+    if: needs.build.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
