@@ -13,6 +13,11 @@ export const APP_TYPES: ReadonlyArray<{ key: string; name: string }> = [
   { key: 'codec', name: '编解码' },
   { key: 'crypto', name: '加解密' },
   { key: 'value-calc', name: '值计算' },
+  { key: 'formatter', name: '格式化' },
+  { key: 'image', name: '图片' },
+  { key: 'generator', name: '生成器' },
+  { key: 'webmaster', name: '站长工具' },
+  { key: 'misc', name: '其它' },
 ];
 
 const TYPE_KEYS = new Set(APP_TYPES.map((t) => t.key));

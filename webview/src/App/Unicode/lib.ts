@@ -3,7 +3,7 @@ export const ascii2Unicode = (value: string) :string => {
   if (value.trim() === '') {
     return '';
   }
-  let reuslt = [];
+  const reuslt: string[] = [];
   for (let i = 0; i < value.length; i++) {
     reuslt.push('&#' + value.charCodeAt(i) + ';');
   }
@@ -17,7 +17,7 @@ export const unicode2Ascii = (value: string) :string => {
   }
   let arr = value.match(/&#(\d+);/g);
   if(null === arr) return '';
-  let reuslt = [];
+  const reuslt: string[] = [];
   for (let i = 0; i < arr.length; i++) {
     // String.fromCharCode( value[i].replace(/[&#;]/g, '') )
     reuslt.push(String.fromCharCode( parseInt(arr[i].replace(/[&#;]/g, '')) ));

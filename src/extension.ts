@@ -68,6 +68,9 @@ function buildHtml(webview: vscode.Webview, extensionUri: vscode.Uri, appKey = '
   });
 
   const nonce = crypto.randomBytes(16).toString('base64');
+  // <base>: 让运行期按相对路径取资源的工具 (Vditor 的 lute 引擎 / katex 等) 能落到
+  // WebView 可访问的 dist/webview/ 下; 打包产物里的静态资源已改写成绝对 URI, 不受影响
+  const baseHref = webview.asWebviewUri(rootUri).toString().replace(/\/*$/, '/');
   const csp = [
     "default-src 'none'",
     `img-src ${webview.cspSource} data: blob:`,
@@ -75,16 +78,19 @@ function buildHtml(webview: vscode.Webview, extensionUri: vscode.Uri, appKey = '
     `font-src ${webview.cspSource} data:`,
     `style-src ${webview.cspSource} 'unsafe-inline'`,
     // wasm-unsafe-eval: SM9 / ZUC 等工具用 WebAssembly 实现
+    // data:/blob: (script): Markdown 预览等场景由运行期注入脚本/Worker
     `script-src ${webview.cspSource} 'wasm-unsafe-eval' 'nonce-${nonce}'`,
     `connect-src ${webview.cspSource} data: blob:`,
     `worker-src ${webview.cspSource} blob:`,
+    // 打印 (习字帖 / 数独) 与 Markdown 预览用 srcdoc iframe
+    `frame-src ${webview.cspSource} data: blob:`,
   ].join('; ');
 
   const boot = appKey ? `<script nonce="${nonce}">window.__MAGIC_TOOLS_APP__=${JSON.stringify(appKey)};</script>` : '';
 
   html = html.replace(
     '</head>',
-    `  <meta http-equiv="Content-Security-Policy" content="${csp}">\n  ${boot}\n  </head>`,
+    `  <base href="${baseHref}">\n  <meta http-equiv="Content-Security-Policy" content="${csp}">\n  ${boot}\n  </head>`,
   );
 
   return html;

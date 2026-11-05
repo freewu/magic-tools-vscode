@@ -1,20 +1,26 @@
 # Magic Tools for VS Code
 
 开发者的「瑞士军刀」工具箱，把 [magic-tools](https://github.com/freewu/magic-tools)（Tauri + React 版）里的
-**类型转换 / 编解码 / 加解密 / 值计算** 四大类共 **71 个工具** 搬进了 VS Code。
+**类型转换 / 编解码 / 加解密 / 值计算 / 格式化 / 生成器 / 站长工具 / 其它** 等九类共 **119 个工具** 搬进了 VS Code。
 
 - 左侧活动栏新增 **Magic Tools** 图标，点开就是工具列表（可搜索、按分类分组）
 - 点某个工具 → 在编辑器区打开一个独立面板（可并排、可拖到第二个标签页）
 - 全部逻辑纯前端运行（Web Crypto / crypto-js / WebAssembly），不联网、不上传数据
+- 少数依赖桌面版原生网络能力的工具（DNS / MTR / Whois / 网页抓取）在扩展里会提示改用桌面版
 
 ## 工具一览
 
 | 分类 | 数量 | 示例 |
 | --- | --- | --- |
-| 类型转换 | 20 | 进制转换、时间戳、单位换算、颜色、经纬度、树形路径… |
+| 类型转换 | 20 | 进制转换、时间戳、单位换算、经纬度、树形路径… |
 | 编解码 | 13 | Base64 / Base58 / BaseX、URL、Unicode、Morse、UUencode、BCD、压缩包… |
 | 加解密 | 23 | AES / DES / 3DES / RC2 / RC4 / SM2 / SM4 / SM9、哈希、HMAC、bcrypt、JWT… |
 | 值计算 | 15 | CRC / BCC / LRC、补码、子网、PPI、字节容量、压缩比、贷款… |
+| 格式化 | 12 | JSON / JSON5 / JS / XML / HTML / SQL / SVG 格式化、Markdown 编辑器、Mermaid、思维导图… |
+| 生成器 | 15 | 二维码 / 条形码、密码、OTP、Cron、Mock 数据、Gitignore、htpasswd、数独、习字帖… |
+| 站长工具 | 16 | UA 解析、Browser 指纹、Cookie 分析、robots / sitemap、Nginx / iptables / tc 规则、关键词密度… |
+| 图片 | 1 | 像素画 |
+| 其它 | 4 | 正则表达式、Chmod 权限、CIDR 计算器、取色板 |
 
 ## 使用
 
@@ -42,7 +48,7 @@ just dev-web     # 只跑前端, 浏览器打开 http://localhost:1212/?app=AESC
 其它常用命令（`just --list` 看全部）：
 
 ```bash
-just test        # 冒烟测试: jsdom 里把 71 个工具 + 外壳各渲染一遍
+just test        # 冒烟测试: jsdom 里把 119 个工具 + 外壳各渲染一遍
 just check       # TypeScript 类型检查 (宿主 + WebView 两套 tsconfig)
 just verify      # check + test + build
 just package     # 打包 magic-tools-<version>.vsix
@@ -60,9 +66,9 @@ just clean       # 清理 out/ dist/ *.vsix
 ├─ src/extension.ts          宿主: 侧边栏 WebView 视图 + 工具面板 + 保存文件/打开链接
 ├─ webview/                  WebView 前端 (React + antd, Vite 构建)
 │  ├─ src/shell/             外壳: 工具列表 / 面板容器 / antd 主题适配 / 工具注册表
-│  ├─ src/App/               71 个工具 (迁移自 magic-tools, 每个目录一个工具)
+│  ├─ src/App/               119 个工具 (迁移自 magic-tools, 每个目录一个工具)
 │  ├─ src/lib/               共享工具库 (字节/编码/文件/bignumber/对称加密)
-│  ├─ src/hook/              locale context (简体/繁体/英文)
+│  ├─ src/hook/              locale / theme context (简体·繁体·英文 / 跟随 VSCode 深浅色)
 │  └─ src/lib/vscode.ts      WebView <-> 宿主的消息桥 (保存文件 / 打开链接 / 状态)
 ├─ dist/webview/             前端构建产物 (打包进 VSIX)
 ├─ out/                      扩展宿主编译产物
@@ -74,10 +80,17 @@ just clean       # 清理 out/ dist/ *.vsix
 
 - 迁移时去掉了 Tauri 相关能力：`webview/src/lib/tauri.ts` 变成薄壳，保存文件走宿主
   `showSaveDialog`，不可用时降级为浏览器下载；打开链接走 `vscode.env.openExternal`。
-- 只保留 `convert / codec / crypto / value-calc` 四类工具（其余分类未迁移）。
-- 少量类型/兼容性微调（不改行为）：`ColorConvert` 的 `color-convert` 改成默认导入、
+- 迁移了 `convert / codec / crypto / value-calc / formatter / image / generator / webmaster / misc`
+  九类工具；上游的「游戏」类与其余图片类工具未迁移。
+- 桌面版专属的原生网络能力（原始 DNS / ICMP / TCP Whois / 无 CORS 网页抓取）在扩展里没有实现，
+  相关工具（DNS 查询、MTR、Whois、网页 TDK、Sitemap 检测）会渲染「仅桌面版可用」提示并给出下载入口。
+- Vditor 的运行时资源（lute 引擎 / KaTeX / 高亮主题等，约 5MB）由 `webview/vite.config.mts` 的
+  `vditorAssets` 插件在构建时拷到 `dist/webview/vditor/`；宿主在 WebView 里注入 `<base href>`，
+  使这些相对路径资源能落到 `asWebviewUri` 可访问的目录（仓库不提交这批大文件）。
+- 少量类型/兼容性微调（不改行为）：`ColorConvert` / `Color` 的 `color-convert` 改成默认导入、
   `Hash/HmacHash/KeccakHash/SHA3Hash` 的类型改为 `export type`、
-  `ComplementCalc` 的判别式改为 `r.ok === false`（`strict:false` 下的收窄）。
+  `ComplementCalc` 的判别式改为 `r.ok === false`、`Unicode` 的数组显式标注 `string[]`、
+  `lib/index.ts` 的 `debounce` 内部时间戳标注为 `number | null`（`strictNullChecks` 下的收窄要求）。
 
 ## 许可
 

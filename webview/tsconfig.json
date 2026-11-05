@@ -7,6 +7,8 @@
     "jsx": "react-jsx",
     "types": ["vite/client"],
     "strict": false,
+    // 判别联合 (ok: true/false) 的收窄依赖 strictNullChecks, 否则 MockData 等工具的类型会退化
+    "strictNullChecks": true,
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "skipLibCheck": true,

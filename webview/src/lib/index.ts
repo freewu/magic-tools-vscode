@@ -9,12 +9,12 @@ export async function copyTextToClipboard(text: string) {
 
 // 防抖函数
 export function debounce(operate:Function, delay:number) {
-  let time :any = null
-  let timer :any = null
-  let newTime = null
+  let time: any = null
+  let timer: any = null
+  let newTime: number | null = null
   function task() {
-    newTime =+ new Date()
-    if(newTime - time < delay) {
+    newTime = +new Date()
+    if (newTime - (time ?? 0) < delay) {
       timer = setTimeout(task, delay)
     } else {
       operate()
@@ -24,7 +24,7 @@ export function debounce(operate:Function, delay:number) {
   }
   return function () {
     // 更新时间戳
-    time =+ new Date();
+    time = +new Date();
     if(!timer) {
       timer = setTimeout(task, delay)
     }
