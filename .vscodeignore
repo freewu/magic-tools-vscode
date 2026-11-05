@@ -1,0 +1,16 @@
+# 发布 VSIX 时排除的内容 (dist/webview 必须保留)
+.vscode/**
+.vscode-test/**
+webview/**
+src/**
+scripts/**
+out/**/*.map
+**/*.ts
+**/*.tsx
+tsconfig.json
+justfile
+package-lock.json
+.gitignore
+.vscodeignore
+node_modules/**
+tests/**

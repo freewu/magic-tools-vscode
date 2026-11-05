@@ -1,24 +1,18 @@
-# Nestjs specific
+# 构建产物
+/out
 /dist
-/node_modules
-/build
-/tmp
+*.vsix
 
-# Logs
+# 依赖
+/node_modules
+
+# 日志 / 临时文件
 logs
 *.log
 npm-debug.log*
-pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-lerna-debug.log*
-
-# dotenv environment variable files
-.env
-.env.development
-.env.test
-.env.production
-
-# temp directory
 .temp
 .tmp
+
+# 编辑器
+.DS_Store
+Thumbs.db

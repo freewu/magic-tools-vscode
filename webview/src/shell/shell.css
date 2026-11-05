@@ -1,0 +1,176 @@
+/* Magic Tools WebView 外壳样式
+ * 颜色全部取 VSCode 注入的 --vscode-* 变量, 明暗主题自动跟随。 */
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  font-family: var(--vscode-font-family);
+  font-size: 13px;
+}
+
+.mt-root {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------- 侧边栏浏览器 */
+
+.mt-browser {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.mt-browser-head {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
+  flex: 0 0 auto;
+}
+
+.mt-browser-foot {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  font-size: 11px;
+  opacity: 0.7;
+  border-top: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
+}
+
+.mt-list {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 4px 0 8px;
+}
+
+.mt-group-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  opacity: 0.75;
+  text-transform: uppercase;
+  position: sticky;
+  top: 0;
+  background: var(--vscode-sideBar-background, var(--vscode-editor-background));
+  z-index: 1;
+}
+
+.mt-group-count {
+  font-weight: 400;
+  opacity: 0.6;
+}
+
+.mt-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 5px 10px;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  line-height: 20px;
+}
+
+.mt-item:hover {
+  background: var(--vscode-list-hoverBackground, rgba(128, 128, 128, 0.15));
+}
+
+.mt-item:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder, #007fd4);
+  outline-offset: -1px;
+}
+
+.mt-item-icon {
+  display: inline-flex;
+  width: 16px;
+  justify-content: center;
+  opacity: 0.85;
+  flex: 0 0 auto;
+}
+
+.mt-item-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------ 编辑器面板 */
+
+.mt-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.mt-panel-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.25));
+  background: var(--vscode-editor-background);
+}
+
+.mt-panel-icon {
+  display: inline-flex;
+  opacity: 0.85;
+}
+
+.mt-panel-title {
+  font-weight: 600;
+}
+
+.mt-link-btn {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: var(--vscode-textLink-foreground, #3794ff);
+  cursor: pointer;
+  font: inherit;
+  padding: 2px 4px;
+}
+
+.mt-link-btn:hover {
+  text-decoration: underline;
+}
+
+.mt-panel-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px 16px 32px;
+}
+
+.mt-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 4px;
+  opacity: 0.8;
+}
+
+/* 工具里原生控件跟随主题 (非 antd 元素) */
+input,
+textarea,
+select {
+  color: var(--vscode-input-foreground, inherit);
+}
