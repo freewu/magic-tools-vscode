@@ -14,3 +14,6 @@ package-lock.json
 .vscodeignore
 node_modules/**
 tests/**
+docs/**
+.github/**
+.pi-multi-agent/**

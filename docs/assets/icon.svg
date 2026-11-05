@@ -1,0 +1,8 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 工具箱: 提手 + 箱体 + 中间卡扣. VSCode 活动栏会按主题着色 (currentColor / alpha) -->
+  <path d="M9 6.5V5.2A2.2 2.2 0 0 1 11.2 3h1.6A2.2 2.2 0 0 1 15 5.2v1.3"
+        stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+  <rect x="2.6" y="6.6" width="18.8" height="14" rx="2.6" stroke="currentColor" stroke-width="1.9"/>
+  <path d="M2.6 12.4h5.6v2.4h7.6v-2.4h5.6"
+        stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

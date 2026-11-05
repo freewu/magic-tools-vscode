@@ -1,7 +1,14 @@
 # Magic Tools for VS Code
 
+[![CI](https://github.com/freewu/magic-tools-vscode/actions/workflows/ci.yml/badge.svg)](https://github.com/freewu/magic-tools-vscode/actions/workflows/ci.yml)
+[![Release VSIX](https://github.com/freewu/magic-tools-vscode/actions/workflows/release.yml/badge.svg)](https://github.com/freewu/magic-tools-vscode/actions/workflows/release.yml)
+[![官网](https://img.shields.io/badge/%E5%AE%98%E7%BD%91-freewu.github.io-3794ff)](https://freewu.github.io/magic-tools-vscode/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 开发者的「瑞士军刀」工具箱，把 [magic-tools](https://github.com/freewu/magic-tools)（Tauri + React 版）里的
 **类型转换 / 编解码 / 加解密 / 值计算 / 格式化 / 生成器 / 站长工具 / 其它** 等九类共 **119 个工具** 搬进了 VS Code。
+
+> 官网（可搜索工具清单 / 下载 .vsix）：<https://freewu.github.io/magic-tools-vscode/>
 
 - 左侧活动栏新增 **Magic Tools** 图标，点开就是工具列表（可搜索、按分类分组）
 - 点某个工具 → 在编辑器区打开一个独立面板（可并排、可拖到第二个标签页）
@@ -53,10 +60,13 @@ just check       # TypeScript 类型检查 (宿主 + WebView 两套 tsconfig)
 just verify      # check + test + build
 just package     # 打包 magic-tools-<version>.vsix
 just install-local  # 安装本地 VSIX (覆盖)
+just docs        # 重新生成官网数据 (工具清单 / 版本)
+just docs-check  # 官网冒烟测试
+just docs-serve  # 本地预览官网 http://localhost:1313
 just clean       # 清理 out/ dist/ *.vsix
 ```
 
-版本号默认读 `package.json`，可临时覆盖：`VERSION=1.3.0 just package`。
+版本号默认读 `package.json`，可临时覆盖：`VERSION=1.4.0 just package`。
 
 也可以用 VS Code 调试：`.vscode/launch.json` 里选择 **运行扩展 (扩展开发宿主)**，会自动先 `npm run build`。
 
@@ -73,9 +83,49 @@ just clean       # 清理 out/ dist/ *.vsix
 │  └─ src/lib/vscode.ts      WebView <-> 宿主的消息桥 (保存文件 / 打开链接 / 网络命令 / 状态)
 ├─ dist/webview/             前端构建产物 (打包进 VSIX)
 ├─ out/                      扩展宿主编译产物
+├─ docs/                     官网 (纯静态, 部署到 GitHub Pages)
 ├─ scripts/smoke.mjs         冒烟测试
+├─ scripts/gen-docs.mjs      从源码生成官网工具清单 (docs/assets/tools-data.js)
+├─ scripts/serve-docs.mjs    官网本地预览 (无依赖静态服务)
+├─ scripts/smoke-docs.mjs    官网冒烟测试 (jsdom 加载页面)
+├─ .github/workflows/        CI / Release VSIX / Deploy Docs
 └─ justfile                  构建/调试/打包命令
 ```
+
+## 发布（GitHub Actions）
+
+`.github/workflows/release.yml` 负责打包并发布 `.vsix`：
+
+```bash
+git tag v1.4.0            # 版本号必须与 package.json 一致 (不一致则 workflow 直接报错)
+git push origin v1.4.0
+```
+
+推标签（或在 Actions 里手动触发 `Release VSIX` 并填版本号）后会自动：
+
+1. `npm ci` → 类型检查 → 冒烟测试 → 构建
+2. `vsce package` 生成 `magic-tools-<version>.vsix`，并输出 `.sha256`
+3. 创建/更新 GitHub Release（附 vsix + 校验文件 + 安装说明），并在 Actions 产物里保留 30 天
+4. 若仓库配置了密钥 `VSCE_PAT`（Azure DevOps PAT，Marketplace 权限），同时发布到 VS Code Marketplace
+
+`ci.yml` 在每次推送到 `main` / PR 时跑类型检查 + 冒烟测试 + 构建。
+
+## 官网（GitHub Pages）
+
+官网源码在 `docs/`（单页静态站，无框架）：
+
+```bash
+just docs          # 从源码重生成工具清单 docs/assets/tools-data.js
+just docs-check    # 官网冒烟测试 (jsdom 加载页面, 验证数据/过滤/搜索)
+just docs-serve    # 本地预览 http://localhost:1313
+```
+
+工具清单不是手写的：`scripts/gen-docs.mjs` 从 `webview/src/App/*/define.tsx` 与
+`webview/src/shell/registry.ts` 的 `APP_TYPES` 抽数据，新增或改名工具后跑一次即同步。
+
+`pages.yml` 在 `docs/**` 或工具清单来源文件变更时自动部署到 GitHub Pages。
+首次启用需在仓库 **Settings → Pages → Source** 选 **GitHub Actions**。
+线上地址：<https://freewu.github.io/magic-tools-vscode/>
 
 ### 与上游的差异
 

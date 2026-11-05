@@ -55,12 +55,12 @@ build-host:
 check:
     {{npm}} run typecheck
 
-# 冒烟测试: 用 jsdom 把 71 个工具页面 + 外壳各渲染一遍 (查导入/渲染错误)
+# 冒烟测试: 用 jsdom 把 119 个工具页面 + 外壳各渲染一遍 (查导入/渲染错误)
 test:
     {{npm}} run test
 
-# 提交前自检: 类型检查 + 冒烟测试 + 构建
-verify: check test build
+# 提交前自检: 类型检查 + 冒烟测试 + 构建 + 官网一致性
+verify: check test build docs-check
 
 # 构建后在浏览器里调试 WebView (http://localhost:1212/?app=<工具key>)
 # 例: http://localhost:1212/?app=AESCrypto
@@ -94,3 +94,15 @@ publish: package
 clean:
     {{npm}} run clean
     rm -f *.vsix
+
+# 重新生成本站 (docs/assets/tools-data.js) —— 工具增删 / 改名 / 版本变更后跑一次
+docs:
+    {{npm}} run docs:gen
+
+# 官网冒烟测试: jsdom 加载 docs/index.html, 验证数据填充 / 分类过滤 / 搜索
+docs-check: docs
+    {{npm}} run docs:test
+
+# 本地预览官网 (http://localhost:1313)
+docs-serve: docs-check
+    {{npm}} run docs:serve

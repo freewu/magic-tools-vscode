@@ -1,0 +1,74 @@
+name: Deploy Docs (GitHub Pages)
+
+# 官网: docs/ 静态站点
+#   - push 到 main 且改动 docs/ 或工具清单来源文件时自动部署
+#   - 也可在 Actions 里手动触发
+#
+# 首次使用: 仓库 Settings -> Pages -> Build and deployment -> Source 选择
+#          "GitHub Actions" (只需设置一次)
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'scripts/gen-docs.mjs'
+      - 'webview/src/App/**/define.tsx'
+      - 'webview/src/shell/registry.ts'
+      - 'package.json'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: 生成并打包站点
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # gen-docs.mjs 只读源码文件, 不需要依赖; 装依赖是为了将来页面需要复用源码数据时不改流程
+      - name: 安装依赖
+        run: npm ci
+
+      - name: 重新生成工具清单 (以源码为准)
+        run: node scripts/gen-docs.mjs
+
+      - name: 检查生成物没有遗漏提交
+        run: |
+          if ! git diff --quiet -- docs; then
+            echo "::warning::docs/ 与源码生成结果不一致, 已用最新生成物部署。建议本地跑一次 npm run docs:gen 并提交。"
+            git --no-pager diff --stat -- docs
+          fi
+
+      - name: 官网冒烟测试
+        run: node scripts/smoke-docs.mjs
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    name: 部署到 GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

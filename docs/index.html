@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Magic Tools for VS Code — 119 个开发者工具，左侧活动栏一键进入</title>
+    <meta
+      name="description"
+      content="Magic Tools 是 VS Code 里的开发者工具箱：类型转换 / 编解码 / 加解密 / 值计算 / 格式化 / 生成器 / 站长工具 等 9 类共 119 个工具，全部本地运行。"
+    />
+    <meta name="theme-color" content="#3794ff" />
+    <link rel="icon" href="assets/icon-color.svg" type="image/svg+xml" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Magic Tools for VS Code" />
+    <meta
+      property="og:description"
+      content="开发者工具箱：9 类共 119 个工具，侧边栏一键进入，全部逻辑本地运行。"
+    />
+    <meta property="og:image" content="assets/icon-color.svg" />
+
+    <link rel="stylesheet" href="assets/style.css" />
+    <script>
+      // 主题尽早应用，避免首屏闪白
+      (() => {
+        try {
+          const saved = localStorage.getItem('magic-tools-docs-theme');
+          const theme =
+            saved ?? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+          document.documentElement.dataset.theme = theme;
+        } catch {
+          document.documentElement.dataset.theme = 'light';
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#tools">跳到工具列表</a>
+
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href="#top">
+          <img src="assets/icon-color.svg" width="26" height="26" alt="" />
+          <span class="brand-name">Magic Tools</span>
+          <span class="brand-tag">for VS Code</span>
+        </a>
+
+        <nav class="site-nav" aria-label="主导航">
+          <a href="#features">特色</a>
+          <a href="#tools">工具</a>
+          <a href="#install">安装</a>
+          <a href="#network">网络能力</a>
+          <a href="#develop">开发</a>
+        </nav>
+
+        <div class="header-actions">
+          <button id="theme-toggle" class="icon-button" type="button" aria-label="切换深浅色主题">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="12" cy="12" r="4.2" />
+              <g stroke-linecap="round">
+                <path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.4 5.4l1.6 1.6M17 17l1.6 1.6M18.6 5.4L17 7M7 17l-1.6 1.6" />
+              </g>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z" />
+            </svg>
+          </button>
+          <a
+            class="btn btn-ghost btn-sm"
+            id="header-repo"
+            href="https://github.com/freewu/magic-tools-vscode"
+            rel="noopener"
+            >GitHub</a
+          >
+        </div>
+      </div>
+    </header>
+
+    <main id="top">
+      <!-- ------------------------------------------------------------------ hero -->
+      <section class="hero">
+        <div class="container hero-inner">
+          <div class="hero-copy">
+            <p class="pill">
+              <span class="pill-dot" aria-hidden="true"></span>
+              <span>v<span data-version>1.4.0</span> · <span data-total>119</span> 个工具 · MIT</span>
+            </p>
+            <h1>开发者工具箱，<br />就在 VS Code 侧边栏</h1>
+            <p class="lede">
+              把 <strong>类型转换 / 编解码 / 加解密 / 值计算 / 格式化 / 生成器 / 站长工具</strong>
+              等九类共 <span data-total>119</span> 个常用工具搬进编辑器：点图标即开，用完即走，
+              全部计算在本地完成，不联网、不上传数据。
+            </p>
+
+            <div class="hero-actions">
+              <a class="btn btn-primary" id="hero-marketplace" href="#" rel="noopener">
+                安装到 VS Code
+              </a>
+              <a class="btn btn-outline" id="hero-vsix" href="#" rel="noopener">下载 .vsix</a>
+              <button class="btn btn-outline" type="button" data-copy="code --install-extension freewu.magic-tools-vscode">
+                复制安装命令
+              </button>
+            </div>
+
+            <ul class="hero-meta">
+              <li>9 类 <span data-total>119</span> 个工具</li>
+              <li>可搜索 / 可折叠分组</li>
+              <li>跟随编辑器深浅色</li>
+              <li>简体 · 繁体 · English</li>
+            </ul>
+          </div>
+
+          <!-- 用纯 CSS 画一个 VS Code 窗口示意，避免仓库塞截图二进制 -->
+          <div class="mock" aria-hidden="true">
+            <div class="mock-titlebar">
+              <span class="mock-dots"><i></i><i></i><i></i></span>
+              <span class="mock-title">magic-tools — Visual Studio Code</span>
+            </div>
+            <div class="mock-body">
+              <div class="mock-rail">
+                <span class="mock-rail-item is-active"></span>
+                <span class="mock-rail-item"></span>
+                <span class="mock-rail-item"></span>
+              </div>
+              <div class="mock-sidebar">
+                <div class="mock-search">搜索工具…</div>
+                <div class="mock-group">
+                  <span class="mock-group-title">类型转换</span><span class="mock-count">20</span>
+                </div>
+                <div class="mock-item is-current">进制转换</div>
+                <div class="mock-item">时间戳转换</div>
+                <div class="mock-item">单位换算</div>
+                <div class="mock-group">
+                  <span class="mock-group-title">加解密</span><span class="mock-count">23</span>
+                </div>
+                <div class="mock-item">AES 加解密</div>
+                <div class="mock-item">哈希计算</div>
+                <div class="mock-group">
+                  <span class="mock-group-title">格式化</span><span class="mock-count">12</span>
+                </div>
+                <div class="mock-item">JSON 格式化</div>
+                <div class="mock-item">SQL 格式化</div>
+              </div>
+              <div class="mock-panel">
+                <div class="mock-tabs"><span class="mock-tab is-active">JSON 格式化</span></div>
+                <div class="mock-editor">
+                  <span class="ln">1</span><span class="tok-punc">{</span><br />
+                  <span class="ln">2</span><span class="tok-key">"name"</span
+                  ><span class="tok-punc">:</span> <span class="tok-str">"magic-tools"</span
+                  ><span class="tok-punc">,</span><br />
+                  <span class="ln">3</span><span class="tok-key">"tools"</span
+                  ><span class="tok-punc">:</span> <span class="tok-num">119</span
+                  ><span class="tok-punc">,</span><br />
+                  <span class="ln">4</span><span class="tok-key">"offline"</span
+                  ><span class="tok-punc">:</span> <span class="tok-bool">true</span><br />
+                  <span class="ln">5</span><span class="tok-punc">}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- -------------------------------------------------------------- features -->
+      <section id="features" class="section">
+        <div class="container">
+          <header class="section-head">
+            <h2>为什么放在编辑器里</h2>
+            <p>少开一个浏览器标签页：查个编码、算个哈希、格式化一段 JSON，都不用离开代码。</p>
+          </header>
+
+          <div class="grid grid-3">
+            <article class="card">
+              <h3>侧边栏一键进入</h3>
+              <p>
+                活动栏新增 Magic Tools 图标，搜索框 + 分类折叠，敲两个关键字就能定位工具；折叠状态会记住。
+              </p>
+            </article>
+            <article class="card">
+              <h3>编辑器里独立面板</h3>
+              <p>
+                每个工具在编辑器区打开一个面板，可并排、可拆分、可与代码对照；同一工具重复打开只聚焦已有标签。
+              </p>
+            </article>
+            <article class="card">
+              <h3>9 类共 <span data-total>119</span> 个工具</h3>
+              <p>
+                类型转换、编解码、加解密、值计算、格式化、图片、生成器、站长工具、其它，迁移自
+                <a id="feat-upstream" href="https://github.com/freewu/magic-tools" rel="noopener">magic-tools</a>
+                桌面版。
+              </p>
+            </article>
+            <article class="card">
+              <h3>全本地运行</h3>
+              <p>
+                Web Crypto、crypto-js、WebAssembly 全部在 WebView 内跑，没有服务端，不采集任何数据。
+              </p>
+            </article>
+            <article class="card">
+              <h3>跟随编辑器主题与语言</h3>
+              <p>
+                用 <code>--vscode-*</code> 变量配色，深浅色 / 高对比度主题自动同步；界面支持简体、繁体与英文。
+              </p>
+            </article>
+            <article class="card">
+              <h3>缺少的能力走宿主桥</h3>
+              <p>
+                DNS 查询、MTR、Whois、网页抓取等浏览器做不了的事，由扩展宿主用 Node 执行（见
+                <a href="#network">网络能力</a>）。
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ----------------------------------------------------------------- tools -->
+      <section id="tools" class="section section-alt">
+        <div class="container">
+          <header class="section-head">
+            <h2>工具一览</h2>
+            <p>
+              共 <span data-total>119</span> 个工具，按分类列出；输入关键字可即时过滤（名称或目录名）。
+            </p>
+          </header>
+
+          <div class="tools-toolbar">
+            <div class="search-wrap">
+              <svg class="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.4" />
+                <path d="M15.8 15.8 21 21" stroke-linecap="round" />
+              </svg>
+              <input
+                id="tools-search"
+                type="search"
+                placeholder="搜索工具，例如 JSON、哈希、二维码…"
+                autocomplete="off"
+                aria-label="搜索工具"
+              />
+            </div>
+            <p class="tools-result" id="tools-result" role="status" aria-live="polite"></p>
+          </div>
+
+          <div class="chips" id="type-chips" role="group" aria-label="按分类过滤"></div>
+
+          <div id="tools-grid" class="tools-grid"></div>
+          <p id="tools-empty" class="tools-empty" hidden>没有匹配的工具，试试别的关键字。</p>
+
+          <details class="tools-all">
+            <summary>按分类查看完整清单</summary>
+            <div id="tools-table"></div>
+          </details>
+        </div>
+      </section>
+
+      <!-- --------------------------------------------------------------- install -->
+      <section id="install" class="section">
+        <div class="container">
+          <header class="section-head">
+            <h2>安装</h2>
+            <p>需要 VS Code 1.75 及以上版本。三种方式任选其一。</p>
+          </header>
+
+          <div class="grid grid-3">
+            <article class="card card-step">
+              <span class="step-no">1</span>
+              <h3>应用市场安装</h3>
+              <p>在扩展面板搜索 <strong>Magic Tools</strong>，或直接点下面的按钮。</p>
+              <p>
+                <a class="btn btn-primary btn-sm" id="install-marketplace" href="#" rel="noopener"
+                  >打开 Marketplace</a
+                >
+              </p>
+              <p class="muted small">
+                使用 VSCodium / code-server 等可以从
+                <a id="install-openvsx" href="#" rel="noopener">Open VSX</a> 安装。
+              </p>
+            </article>
+
+            <article class="card card-step">
+              <span class="step-no">2</span>
+              <h3>命令行安装</h3>
+              <p>已经装好 <code>code</code> 命令的话，一行搞定：</p>
+              <div class="code-block">
+                <code>code --install-extension freewu.magic-tools-vscode</code>
+                <button
+                  class="copy-btn"
+                  type="button"
+                  data-copy="code --install-extension freewu.magic-tools-vscode"
+                  aria-label="复制安装命令"
+                >
+                  复制
+                </button>
+              </div>
+            </article>
+
+            <article class="card card-step">
+              <span class="step-no">3</span>
+              <h3>离线 VSIX</h3>
+              <p>内网 / 断网环境：下载 <code>magic-tools-&lt;version&gt;.vsix</code> 后本地安装。</p>
+              <p>
+                <a class="btn btn-outline btn-sm" id="install-releases" href="#" rel="noopener"
+                  >下载最新 .vsix</a
+                >
+              </p>
+              <div class="code-block">
+                <code>code --install-extension magic-tools-<span data-version>1.4.0</span>.vsix</code>
+                <button
+                  class="copy-btn"
+                  type="button"
+                  data-copy="code --install-extension magic-tools-{version}.vsix"
+                  data-copy-version
+                  aria-label="复制 VSIX 安装命令"
+                >
+                  复制
+                </button>
+              </div>
+            </article>
+          </div>
+
+          <div class="callout">
+            <h3>装好之后</h3>
+            <ol>
+              <li>点左侧活动栏的 <strong>Magic Tools</strong> 图标（或命令面板 <code>视图: 显示 Magic Tools</code>）。</li>
+              <li>在侧边栏搜索工具，点击即会在编辑器区打开面板。</li>
+              <li>用 <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>P</kbd> 之类的自定义快捷键绑定命令 <code>magic-tools.open</code> 也能直接打开侧边栏。</li>
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- --------------------------------------------------------------- network -->
+      <section id="network" class="section section-alt">
+        <div class="container">
+          <header class="section-head">
+            <h2>网络能力（宿主桥）</h2>
+            <p>
+              有些工具浏览器做不了（原始 DNS、ICMP、TCP Whois、跨域抓取）。扩展宿主用 Node
+              内置模块实现了同名命令，webview 通过消息桥调用，因此这些工具在扩展里同样可用。
+            </p>
+          </header>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">命令</th>
+                  <th scope="col">宿主实现</th>
+                  <th scope="col">说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>dns_query</code></td>
+                  <td>自组 DNS 报文 → UDP 53，截断时改 TCP</td>
+                  <td>保留真实 TTL 与否定应答 SOA，支持 A / AAAA / CNAME / MX / TXT / SRV / NS / SOA / PTR / CAA</td>
+                </tr>
+                <tr>
+                  <td><code>reverse_dns</code></td>
+                  <td><code>dns.promises.reverse</code></td>
+                  <td>MTR 逐跳名称解析</td>
+                </tr>
+                <tr>
+                  <td><code>whois_query</code></td>
+                  <td>TCP 43 + <code>refer:</code> 逐级转介</td>
+                  <td>最多 3 跳，内置常用 TLD 服务器表</td>
+                </tr>
+                <tr>
+                  <td><code>mtr_probe</code></td>
+                  <td>系统 <code>ping</code> 的 TTL 参数逐跳探测</td>
+                  <td>计时口径与真实 ICMP 略有差异；仅支持 IPv4 目标</td>
+                </tr>
+                <tr>
+                  <td><code>fetch_url_body</code></td>
+                  <td><code>http/https</code> + gzip/deflate/br</td>
+                  <td>绕过 CORS，3MB 上限、20 秒超时，字符集由前端探测</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="muted small">
+            纯浏览器环境（<code>npm run dev:web</code>）没有宿主，这些工具会显示「仅桌面版可用」提示并给出下载入口。
+          </p>
+        </div>
+      </section>
+
+      <!-- --------------------------------------------------------------- develop -->
+      <section id="develop" class="section">
+        <div class="container">
+          <header class="section-head">
+            <h2>本地开发</h2>
+            <p>仓库用 <a id="dev-repo" href="#" rel="noopener">GitHub</a> 托管，构建脚本收敛在 <code>just</code> / <code>npm</code> 里。</p>
+          </header>
+
+          <div class="grid grid-2">
+            <div class="card">
+              <h3>常用命令</h3>
+              <div class="code-block code-block-list">
+                <code>just install        # 安装依赖<br />just dev            # 构建并打开扩展开发宿主<br />just dev-web        # 只跑前端 http://localhost:1212<br />just verify         # 类型检查 + 冒烟测试 + 构建<br />just package        # 生成 .vsix<br />just docs           # 重新生成本站</code>
+              </div>
+            </div>
+            <div class="card">
+              <h3>工程结构</h3>
+              <div class="code-block code-block-list">
+                <code>src/extension.ts   宿主: 侧边栏 / 面板 / 网络命令桥<br />src/net/           宿主网络能力实现<br />webview/src/App/   <span data-total>119</span> 个工具 (每个目录一个)<br />webview/src/shell/ 外壳与工具注册表<br />docs/              本站 (GitHub Pages)<br />scripts/           冒烟测试 / 本站生成</code>
+              </div>
+            </div>
+          </div>
+
+          <details class="develop-details">
+            <summary>新增一个工具需要做什么</summary>
+            <ol class="steps">
+              <li>在 <code>webview/src/App/&lt;ToolKey&gt;/</code> 放 <code>define.tsx</code>（<code>AppName</code> / <code>Icon</code> / <code>Type</code>）与 <code>index.tsx</code>。</li>
+              <li>注册表通过 <code>import.meta.glob</code> 自动发现，无需改代码；分类在 <code>webview/src/shell/registry.ts</code> 的 <code>APP_TYPES</code> 里。</li>
+              <li>跑 <code>npm test</code>（jsdom 会把每个工具页面渲染一遍）与 <code>just docs</code> 更新本站清单。</li>
+            </ol>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-inner">
+        <div class="footer-brand">
+          <img src="assets/icon-color.svg" width="22" height="22" alt="" />
+          <span>Magic Tools for VS Code</span>
+        </div>
+        <nav class="footer-nav" aria-label="页脚导航">
+          <a id="footer-marketplace" href="#" rel="noopener">Marketplace</a>
+          <a id="footer-openvsx" href="#" rel="noopener">Open VSX</a>
+          <a id="footer-releases" href="#" rel="noopener">Releases</a>
+          <a id="footer-issues" href="#" rel="noopener">反馈问题</a>
+          <a id="footer-upstream" href="#" rel="noopener">桌面版</a>
+          <a id="footer-repo" href="#" rel="noopener">源码</a>
+        </nav>
+        <p class="footer-copy">
+          v<span data-version>1.4.0</span> · MIT License · 页面由 <code>scripts/gen-docs.mjs</code> 生成于
+          <span id="build-year">2026</span>
+        </p>
+      </div>
+    </footer>
+
+    <script src="assets/tools-data.js"></script>
+    <script src="assets/app.js"></script>
+  </body>
+</html>

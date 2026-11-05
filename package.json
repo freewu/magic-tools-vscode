@@ -2,7 +2,7 @@
   "name": "magic-tools-vscode",
   "displayName": "Magic Tools",
   "description": "开发者工具箱: 类型转换 / 编解码 / 加解密 / 值计算 / 格式化 / 生成器 / 站长工具 等 119 个工具, 左侧活动栏一键进入",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "publisher": "freewu",
   "license": "MIT",
   "engines": {
@@ -31,6 +31,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/freewu/magic-tools-vscode.git"
+  },
+  "homepage": "https://freewu.github.io/magic-tools-vscode/",
+  "bugs": {
+    "url": "https://github.com/freewu/magic-tools-vscode/issues"
   },
   "main": "./out/extension.js",
   "activationEvents": [
@@ -81,7 +85,10 @@
     "dev:web": "vite --config webview/vite.config.mts",
     "test": "node scripts/smoke.mjs",
     "preview": "vite preview --config webview/vite.config.mts",
-    "publish": "vsce publish --no-dependencies"
+    "publish": "vsce publish --no-dependencies",
+    "docs:gen": "node scripts/gen-docs.mjs",
+    "docs:serve": "node scripts/serve-docs.mjs",
+    "docs:test": "node scripts/smoke-docs.mjs"
   },
   "devDependencies": {
     "@ant-design/icons": "^5.1.0",

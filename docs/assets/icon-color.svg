@@ -1,0 +1,8 @@
+<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 编辑器标签页图标: 显式配色 (标签页图标不会按主题着色, 用固定色保证暗色主题可见) -->
+  <path d="M9 6.5V5.2A2.2 2.2 0 0 1 11.2 3h1.6A2.2 2.2 0 0 1 15 5.2v1.3"
+        stroke="#3794ff" stroke-width="1.9" stroke-linecap="round"/>
+  <rect x="2.6" y="6.6" width="18.8" height="14" rx="2.6" stroke="#3794ff" stroke-width="1.9"/>
+  <path d="M2.6 12.4h5.6v2.4h7.6v-2.4h5.6"
+        stroke="#3794ff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
