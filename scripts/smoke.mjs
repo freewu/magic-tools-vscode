@@ -96,11 +96,30 @@ for (const key of keys) {
 }
 
 // 外壳 (工具列表 / 面板) 也渲染一遍: 覆盖 import.meta.glob 注册表与主题适配
+// 另外验证「按分类折叠」: 默认全部展开, 读 localStorage 里的折叠状态后对应分类收起
 try {
   const { default: Shell } = await server.ssrLoadModule('/src/shell/Shell.tsx');
+  const { APP_TYPES } = await server.ssrLoadModule('/src/shell/registry.ts');
+
+  window.localStorage.removeItem('magic-tools.collapsed-groups');
   const shellHtml = renderToStaticMarkup(React.createElement(Shell));
   if (!shellHtml.includes('mt-browser')) throw new Error('外壳未渲染出工具列表');
-  console.log('\n✓ 外壳 (工具列表) 渲染通过');
+  if (!shellHtml.includes('mt-group-toggle')) throw new Error('分类标题不可折叠 (缺少 mt-group-toggle)');
+  const bodiesAll = shellHtml.split('mt-group-body').length - 1;
+  if (bodiesAll !== APP_TYPES.length) throw new Error(`默认应展开全部 ${APP_TYPES.length} 个分类, 实际 ${bodiesAll}`);
+  if (shellHtml.includes('aria-expanded="false"')) throw new Error('默认状态下出现了已折叠的分类');
+
+  const collapsedKey = APP_TYPES[1].key;
+  window.localStorage.setItem('magic-tools.collapsed-groups', JSON.stringify([collapsedKey]));
+  const foldedHtml = renderToStaticMarkup(React.createElement(Shell));
+  const bodiesFolded = foldedHtml.split('mt-group-body').length - 1;
+  if (bodiesFolded !== APP_TYPES.length - 1) {
+    throw new Error(`折叠 1 个分类后应剩 ${APP_TYPES.length - 1} 个展开, 实际 ${bodiesFolded}`);
+  }
+  if (!foldedHtml.includes('aria-expanded="false"')) throw new Error('折叠状态未生效 (aria-expanded 仍为 true)');
+  window.localStorage.removeItem('magic-tools.collapsed-groups');
+
+  console.log('\n✓ 外壳 (工具列表) 渲染通过 · 分类折叠状态读取正常');
 } catch (error) {
   failed += 1;
   errors.push({ key: 'Shell', message: error?.message ?? String(error) });

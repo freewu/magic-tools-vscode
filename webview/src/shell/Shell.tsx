@@ -5,9 +5,9 @@
 //      点击工具 -> 通知宿主在编辑器区打开一个 WebView 面板
 //   2. 编辑器面板 (?app=<key>): 只渲染该工具 (整块宽度, 适合宽表单类工具)
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ConfigProvider, Empty, Input } from 'antd';
-import { SearchOutlined } from '@ant-design/icons';
+import { CompressOutlined, ExpandOutlined, SearchOutlined } from '@ant-design/icons';
 import { APP_LIST, APP_TYPES } from './registry';
 import type { AppMeta } from './registry';
 import { appIconNode } from './app-icons';
@@ -20,6 +20,27 @@ import './shell.css';
 const openTool = (app: AppMeta): void => {
   postToHost({ command: 'openTool', key: app.key, name: app.name });
 };
+
+/** 分类折叠状态 (按分类 key 记) 持久化到 WebView 的 localStorage */
+const COLLAPSE_KEY = 'magic-tools.collapsed-groups';
+
+function loadCollapsed(): Set<string> {
+  try {
+    const raw = window.localStorage.getItem(COLLAPSE_KEY);
+    const list = raw ? JSON.parse(raw) : [];
+    return Array.isArray(list) ? new Set(list.filter((key): key is string => typeof key === 'string')) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveCollapsed(next: Set<string>): void {
+  try {
+    window.localStorage.setItem(COLLAPSE_KEY, JSON.stringify([...next]));
+  } catch {
+    /* 隐私模式等场景下不可写, 忽略 */
+  }
+}
 
 /** 编辑器面板: 单个工具 (带一条很窄的标题栏) */
 function PanelView({ appKey, onBack }: { appKey: string; onBack?: () => void }) {
@@ -45,6 +66,7 @@ function PanelView({ appKey, onBack }: { appKey: string; onBack?: () => void }) 
 /** 侧边栏: 搜索 + 分组工具列表 */
 function BrowserView({ onPreview }: { onPreview: (key: string) => void }) {
   const [keyword, setKeyword] = useState('');
+  const [collapsed, setCollapsed] = useState<Set<string>>(loadCollapsed);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const groups = useMemo(() => {
@@ -56,6 +78,35 @@ function BrowserView({ onPreview }: { onPreview: (key: string) => void }) {
       ),
     })).filter((group) => group.apps.length > 0);
   }, [keyword]);
+
+  // 搜索时一律展开 (否则命中的工具藏在折叠的分类里), 此时分类标题不可点
+  const searching = keyword.trim().length > 0;
+  const isCollapsed = (key: string) => !searching && collapsed.has(key);
+
+  const toggle = useCallback((key: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      saveCollapsed(next);
+      return next;
+    });
+  }, []);
+
+  const allCollapsed = groups.length > 0 && groups.every((group) => collapsed.has(group.key));
+  const toggleAll = useCallback(() => {
+    const keys = groups.map((group) => group.key);
+    const foldAll = !keys.every((key) => collapsed.has(key));
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      for (const key of keys) {
+        if (foldAll) next.add(key);
+        else next.delete(key);
+      }
+      saveCollapsed(next);
+      return next;
+    });
+  }, [collapsed, groups]);
 
   const click = (app: AppMeta) => {
     if (hasHost()) {
@@ -71,6 +122,7 @@ function BrowserView({ onPreview }: { onPreview: (key: string) => void }) {
       <div className="mt-browser-head">
         <Input
           ref={inputRef as never}
+          className="mt-search"
           size="small"
           allowClear
           prefix={<SearchOutlined />}
@@ -78,30 +130,59 @@ function BrowserView({ onPreview }: { onPreview: (key: string) => void }) {
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
         />
+        <button
+          type="button"
+          className="mt-head-btn"
+          disabled={searching || groups.length === 0}
+          title={allCollapsed ? '展开全部分类' : '折叠全部分类'}
+          onClick={toggleAll}
+        >
+          {allCollapsed ? <ExpandOutlined /> : <CompressOutlined />}
+        </button>
       </div>
 
       <div className="mt-list">
         {groups.length === 0 && <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="没有匹配的工具" />}
-        {groups.map((group) => (
-          <section key={group.key} className="mt-group">
-            <header className="mt-group-title">
-              {group.name}
-              <span className="mt-group-count">{group.apps.length}</span>
-            </header>
-            {group.apps.map((app) => (
-              <button
-                type="button"
-                key={app.key}
-                className="mt-item"
-                title={app.name}
-                onClick={() => click(app)}
-              >
-                <span className="mt-item-icon">{appIconNode(app.icon)}</span>
-                <span className="mt-item-name">{app.name}</span>
-              </button>
-            ))}
-          </section>
-        ))}
+        {groups.map((group) => {
+          const folded = isCollapsed(group.key);
+          return (
+            <section key={group.key} className="mt-group">
+              <header className="mt-group-title">
+                <button
+                  type="button"
+                  className="mt-group-toggle"
+                  aria-expanded={!folded}
+                  aria-controls={`mt-group-${group.key}`}
+                  disabled={searching}
+                  title={folded ? `展开「${group.name}」` : `折叠「${group.name}」`}
+                  onClick={() => toggle(group.key)}
+                >
+                  <span className={`mt-caret${folded ? '' : ' mt-caret--open'}`} aria-hidden>
+                    ▶
+                  </span>
+                  <span className="mt-group-name">{group.name}</span>
+                  <span className="mt-group-count">{group.apps.length}</span>
+                </button>
+              </header>
+              {!folded && (
+                <div className="mt-group-body" id={`mt-group-${group.key}`}>
+                  {group.apps.map((app) => (
+                    <button
+                      type="button"
+                      key={app.key}
+                      className="mt-item"
+                      title={app.name}
+                      onClick={() => click(app)}
+                    >
+                      <span className="mt-item-icon">{appIconNode(app.icon)}</span>
+                      <span className="mt-item-name">{app.name}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+          );
+        })}
       </div>
 
       <footer className="mt-browser-foot">共 {APP_LIST.length} 个工具 · 点击在编辑器区打开</footer>
