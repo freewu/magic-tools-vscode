@@ -14,6 +14,13 @@
 #
 # 提醒: 所有步骤都收敛在 package.json 的 scripts 里, 需要时直接 npm run <script> 也可。
 
+# npm 的调用方式:
+# Windows 下必须走 npm.cmd —— PATH 里的 C:\Windows\system32\bash.exe (WSL)
+# 会抢占 npm 脚本的 #!/usr/bin/env bash, 报
+#   /bin/bash: /cygdrive/d/env/nodejs/npm: No such file or directory
+# (Node 由 nvm-windows 装在 junction 上时尤其明显)
+npm := if os() == "windows" { "npm.cmd" } else { "npm" }
+
 # 版本号; 默认取 package.json, 可用 VERSION 环境变量覆盖
 # 例: VERSION=1.2.0 just package
 version := env_var_or_default("VERSION", `node -p "require('./package.json').version"`)
@@ -30,27 +37,27 @@ help:
 
 # 安装依赖 (首次 / 依赖变更后)
 install:
-    npm install
+    {{npm}} install
 
 # 构建全部: WebView 前端 (vite) -> dist/webview/, 宿主扩展 (tsc) -> out/
 build:
-    npm run build
+    {{npm}} run build
 
 # 只构建 WebView 前端
 build-web:
-    npm run build:webview
+    {{npm}} run build:webview
 
 # 只编译宿主扩展
 build-host:
-    npm run build:host
+    {{npm}} run build:host
 
 # TypeScript 类型检查 (宿主扩展)
 check:
-    npm run typecheck
+    {{npm}} run typecheck
 
 # 冒烟测试: 用 jsdom 把 71 个工具页面 + 外壳各渲染一遍 (查导入/渲染错误)
 test:
-    npm run test
+    {{npm}} run test
 
 # 提交前自检: 类型检查 + 冒烟测试 + 构建
 verify: check test build
@@ -58,7 +65,7 @@ verify: check test build
 # 构建后在浏览器里调试 WebView (http://localhost:1212/?app=<工具key>)
 # 例: http://localhost:1212/?app=AESCrypto
 dev-web:
-    npm run dev:web
+    {{npm}} run dev:web
 
 # 构建并打开「扩展开发宿主」窗口调试 (改完代码在宿主窗口里 Ctrl+R 重载)
 dev: build
@@ -66,13 +73,13 @@ dev: build
 
 # 监听重建 (配合 dev 打开的宿主窗口; 重建后在宿主里 Ctrl+R 重载)
 watch:
-    npm run build:host
-    npm run build:webview
-    npm run watch:host & npm run watch:webview & wait
+    {{npm}} run build:host
+    {{npm}} run build:webview
+    {{npm}} run watch:host & {{npm}} run watch:webview & wait
 
 # 打包 VSIX (out/ + dist/webview/ 打进扩展)
 package: build
-    npm run package -- --out {{vsix}}
+    {{npm}} run package -- --out {{vsix}}
     @echo "✓ 已生成 {{vsix}}"
 
 # 本地安装已打包的 VSIX (覆盖安装)
@@ -81,9 +88,9 @@ install-local: package
 
 # 发布到 VS Code Marketplace (需先 npx vsce login <publisher>, 并把 publisher 写进 package.json)
 publish: package
-    npm run publish -- --packagePath {{vsix}}
+    {{npm}} run publish -- --packagePath {{vsix}}
 
 # 清理构建产物
 clean:
-    npm run clean
+    {{npm}} run clean
     rm -f *.vsix
