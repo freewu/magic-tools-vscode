@@ -124,7 +124,8 @@ just docs-serve    # 本地预览 http://localhost:1313
 `webview/src/shell/registry.ts` 的 `APP_TYPES` 抽数据，新增或改名工具后跑一次即同步。
 
 `pages.yml` 在 `docs/**` 或工具清单来源文件变更时自动部署到 GitHub Pages。
-首次启用需在仓库 **Settings → Pages → Source** 选 **GitHub Actions**。
+首次启用需在仓库 **Settings → Pages → Source** 选 **GitHub Actions**；未启用时工作流会跳过部署
+并留一条 warning（不会变成红灯）。
 线上地址：<https://freewu.github.io/magic-tools-vscode/>
 
 ### 与上游的差异
