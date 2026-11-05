@@ -2,7 +2,7 @@
   "name": "magic-tools-vscode",
   "displayName": "Magic Tools",
   "description": "开发者工具箱: 类型转换 / 编解码 / 加解密 / 值计算 / 格式化 / 生成器 / 站长工具 等 119 个工具, 左侧活动栏一键进入",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "publisher": "freewu",
   "license": "MIT",
   "engines": {

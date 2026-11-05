@@ -2,7 +2,7 @@ import { Button, Collapse, Descriptions, Divider, Input, Space, Tag, Typography,
 import { CopyOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { copyTextToClipboard } from '../../lib';
-import { isTauri } from '../../lib/tauri';
+import { netAvailable } from '../../lib/net-bridge';
 import DesktopOnlyNotice from '../../lib/desktop';
 import { useLocale } from '../../hook/locale-context';
 import { wq, wqT } from './lang';
@@ -19,7 +19,7 @@ const WhoisQuery = () => {
   const tt = (zh: string, v?: Record<string, string | number>) => wqT(locale, zh, v);
   const { token } = theme.useToken();
 
-  const desktop = isTauri(); // 桌面版才能建立 TCP 43 连接
+  const desktop = netAvailable(); // 需要宿主网络能力 (桌面版 / 扩展)
   const [ input, setInput ] = useState('');           // 查询对象 (域名 / IP)
   const [ loading, setLoading ] = useState(false);    // 查询中
   const [ result, setResult ] = useState<WhoisResult | null>(null);

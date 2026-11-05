@@ -1,8 +1,8 @@
 // 「仅桌面版可用」能力的通用提示 (VSCode 版)
 //
-// DnsQuery / MtrQuery / WhoisQuery / WebTDKCheck / SitemapCheck 依赖桌面版内置的
-// Rust 网络命令 (原始 DNS / ICMP / TCP Whois), 扩展宿主没有对应能力, 因此这些工具
-// 在扩展里只渲染本提示条, 引导用户改用桌面版。
+// DnsQuery / MtrQuery / WhoisQuery / WebTDKCheck / SitemapCheck 依赖宿主侧的网络能力。
+// 扩展宿主已通过命令桥 (src/net/*) 提供这些能力, 因此扩展里可正常使用; 本提示只在
+// 纯浏览器演示环境下渲染, 引导用户改用桌面版。
 // 文案由各工具自己提供 (多语言), 这里只负责统一的展示形态与下载入口。
 import { Alert, Button, theme } from 'antd';
 import { DownloadOutlined } from '@ant-design/icons';

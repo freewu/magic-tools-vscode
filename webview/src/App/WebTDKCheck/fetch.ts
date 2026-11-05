@@ -1,6 +1,6 @@
 // 网页抓取层: Tauri 桌面端经 Rust 命令绕过 CORS, 浏览器端直接 fetch (受限)
 
-import { isTauri } from '../../lib/tauri';
+import { netAvailable, netInvoke } from '../../lib/net-bridge';
 
 type FetchedPage = {
   status: number;
@@ -61,9 +61,8 @@ export async function fetchPageHtml(url: string): Promise<FetchedPageResult> {
   }
 
   // Tauri 桌面端: Rust 侧抓取, 无跨域限制
-  if (isTauri()) {
-    const { invoke } = await import('@tauri-apps/api/core');
-    const page = await invoke<FetchedPage>('fetch_url_body', { url: target });
+  if (netAvailable()) {
+    const page = await netInvoke<FetchedPage>('fetch_url_body', { url: target });
     const bytes = base64ToBytes(page.base64);
     const html = new TextDecoder(sniffCharset(bytes, page.contentType)).decode(bytes);
     return { html, finalUrl: page.finalUrl || target };

@@ -3,7 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { CopyOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMemo, useRef, useState } from 'react';
 import { copyTextToClipboard } from '../../lib';
-import { isTauri } from '../../lib/tauri';
+import { netAvailable } from '../../lib/net-bridge';
 import DesktopOnlyNotice from '../../lib/desktop';
 import { useLocale } from '../../hook/locale-context';
 import { mq, mqT } from './lang';
@@ -24,7 +24,7 @@ const MtrQuery = () => {
   const tt = (zh: string, v?: Record<string, string | number>) => mqT(locale, zh, v);
   const { token } = theme.useToken();
 
-  const desktop = isTauri(); // 桌面版才能发送 ICMP
+  const desktop = netAvailable(); // 需要宿主网络能力 (桌面版 / 扩展)
   const [ input, setInput ] = useState('');                  // 目标输入
   const [ maxHops, setMaxHops ] = useState(DEFAULT_MTR_OPTIONS.maxHops);
   const [ rounds, setRounds ] = useState(DEFAULT_MTR_OPTIONS.rounds);

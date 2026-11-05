@@ -1,18 +1,15 @@
-// DNS 查询网络层: 浏览器版无应用内 DNS 能力, 只走桌面版 (Tauri) 的 Rust 命令
+// DNS 查询网络层: 走宿主命令桥 (桌面版 = Tauri Rust 命令, VS Code = 扩展宿主 Node)
 
-import { isTauri } from '../../lib/tauri';
+import { NET_UNAVAILABLE_ERROR, netAvailable, netInvoke } from '../../lib/net-bridge';
 import { ALL_RECORD_TYPES, RECORD_TYPES, type DnsQueryResult, type DnsTypeResult } from './lib';
 
-/** 浏览器环境下调用网络命令的统一错误 */
-export const DESKTOP_ONLY_ERROR = '该功能仅在桌面应用中可用';
+/** 无宿主网络能力时调用网络命令的统一错误 */
+export const DESKTOP_ONLY_ERROR = NET_UNAVAILABLE_ERROR;
 
-type RawInvoke = <T>(cmd: string, args?: Record<string, unknown>) => Promise<T>;
-
-/** 延迟加载 @tauri-apps/api (浏览器环境不应触发导入) */
+/** 调用宿主命令 (无宿主能力时直接报错, 避免触发动态导入) */
 async function invokeCmd<T>(cmd: string, args: Record<string, unknown>): Promise<T> {
-  if (!isTauri()) throw new Error(DESKTOP_ONLY_ERROR);
-  const { invoke } = await import('@tauri-apps/api/core');
-  return (invoke as RawInvoke)<T>(cmd, args);
+  if (!netAvailable()) throw new Error(DESKTOP_ONLY_ERROR);
+  return netInvoke<T>(cmd, args);
 }
 
 /** 判断是否「全部类型」查询 */
@@ -46,7 +43,7 @@ export async function queryDns(
  * @param server DNS 服务器 IP
  */
 export async function queryAllDns(name: string, server: string): Promise<DnsTypeResult[]> {
-  if (!isTauri()) throw new Error(DESKTOP_ONLY_ERROR);
+  if (!netAvailable()) throw new Error(DESKTOP_ONLY_ERROR);
   const custom = server.trim();
   const settled = await Promise.allSettled(RECORD_TYPES.map((t) => queryDns(name, t, server)));
   return settled.map((item, i) => {

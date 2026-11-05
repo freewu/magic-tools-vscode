@@ -4,6 +4,8 @@ import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
 
+import { runNetCommand } from './net/commands';
+
 /**
  * Magic Tools - VS Code 扩展宿主
  *
@@ -12,7 +14,8 @@ import * as path from 'path';
  *   - 无参数        -> 侧边栏: 搜索 + 分类工具列表
  *   - ?app=<key>    -> 编辑器面板: 渲染单个工具
  *
- * 宿主只负责三件事: 提供 WebView 资源 / 打开工具面板 / 提供保存文件与打开链接的系统能力。
+ * 宿主负责: 提供 WebView 资源 / 打开工具面板 / 提供保存文件与打开链接的系统能力,
+ * 以及 webview 无法自己完成的网络能力 (DNS / Whois / ICMP 探测 / 跨域抓取)。
  */
 
 const SIDEBAR_CONTAINER_ID = 'magic-tools-sidebar';
@@ -147,6 +150,9 @@ class ToolsViewProvider implements vscode.WebviewViewProvider {
       case 'saveFile':
         void this.saveFile(webview, message);
         return;
+      case 'netCommand':
+        void this.runNetCommand(webview, message);
+        return;
       default:
         return;
     }
@@ -180,6 +186,23 @@ class ToolsViewProvider implements vscode.WebviewViewProvider {
     });
     panel.onDidDispose(() => this.panels.delete(appKey));
     this.panels.set(appKey, panel);
+  }
+
+  /**
+   * 网络命令桥: DNS / 反向解析 / Whois / MTR 探测 / 网页抓取
+   * 命令名与桌面版 Tauri 命令一致, 前端 (webview/src/lib/net-bridge.ts) 统一投递到这里
+   */
+  private async runNetCommand(webview: vscode.Webview, message: Record<string, unknown>): Promise<void> {
+    const requestId = String(message.requestId ?? '');
+    const cmd = String(message.cmd ?? '');
+    const args = (message.args ?? {}) as Record<string, unknown>;
+    try {
+      const result = await runNetCommand(cmd, args);
+      void webview.postMessage({ command: 'netCommandResult', requestId, ok: true, result });
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : String(error);
+      void webview.postMessage({ command: 'netCommandResult', requestId, ok: false, error: detail });
+    }
   }
 
   /**

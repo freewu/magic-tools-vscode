@@ -2,7 +2,7 @@ import { Alert, Button, Card, Input, Segmented, Space, Spin, Table, Tabs, Tag, T
 import { CopyOutlined, DownloadOutlined, LinkOutlined, ReloadOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import { useMemo, useState } from 'react';
-import { isTauri } from '../../lib/tauri';
+import { netAvailable, netInvoke } from '../../lib/net-bridge';
 import { parseSitemap, entriesToCsv } from './lib';
 import { useLocale } from '../../hook/locale-context';
 import { wm, wmT } from './lang';
@@ -36,9 +36,8 @@ const SAMPLE = `<?xml version="1.0" encoding="UTF-8"?>
 /** 抓取远程 sitemap 文本 (Tauri 桌面端走 Rust 命令) */
 async function fetchXml(url: string): Promise<string> {
   if (/\.gz(?:$|\?)/i.test(url)) throw new Error('检测到 .gz 压缩包: 请先本地解压后粘贴内容');
-  if (isTauri()) {
-    const { invoke } = await import('@tauri-apps/api/core');
-    const page = await invoke<{ contentType: string | null; finalUrl: string; base64: string }>('fetch_url_body', { url });
+  if (netAvailable()) {
+    const page = await netInvoke<{ contentType: string | null; finalUrl: string; base64: string }>('fetch_url_body', { url });
     const bin = atob(page.base64);
     const bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);

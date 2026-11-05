@@ -5,7 +5,7 @@ import {
   SearchOutlined,
 } from '@ant-design/icons';
 import { copyTextToClipboard } from '../../lib';
-import { isTauri } from '../../lib/tauri';
+import { netAvailable } from '../../lib/net-bridge';
 import DesktopOnlyNotice from '../../lib/desktop';
 import { checkTdkField, parseTdk, TDK_FIELDS, type TdkResult } from './lib';
 import { fetchPageHtml } from './fetch';
@@ -26,7 +26,7 @@ const WebTDKCheck = () => {
   const [ finalUrl, setFinalUrl ] = useState(''); // 最终地址
   const [ notice, contextHolder ] = message.useMessage();
 
-  const desktop = isTauri(); // 桌面版可绕过 CORS 直接抓取网页
+  const desktop = netAvailable(); // 需要宿主网络能力 (桌面版 / 扩展)
 
   // 检测
   const check = async () => {

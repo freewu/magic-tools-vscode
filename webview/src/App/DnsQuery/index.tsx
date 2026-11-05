@@ -3,7 +3,7 @@ import type { ColumnsType } from 'antd/es/table';
 import { CopyOutlined, SearchOutlined } from '@ant-design/icons';
 import { useMemo, useState } from 'react';
 import { copyTextToClipboard } from '../../lib';
-import { isTauri } from '../../lib/tauri';
+import { netAvailable } from '../../lib/net-bridge';
 import DesktopOnlyNotice from '../../lib/desktop';
 import { useLocale } from '../../hook/locale-context';
 import { dq, dqT } from './lang';
@@ -20,7 +20,7 @@ const DnsQuery = () => {
   const tt = (zh: string, v?: Record<string, string | number>) => dqT(locale, zh, v);
   const { token } = theme.useToken();
 
-  const desktop = isTauri(); // 桌面版才能发起 DNS 查询
+  const desktop = netAvailable(); // 需要宿主网络能力 (桌面版 / 扩展)
   const [ name, setName ] = useState('');                 // 域名
   const [ type, setType ] = useState<string>('A');        // 记录类型
   const [ server, setServer ] = useState('system');       // DNS 服务器
